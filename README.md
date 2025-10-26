@@ -41,7 +41,7 @@ This project was developed as a personal study of Java and Object-Oriented Progr
     ```
 3.  **Navigate to the source folder and compile:**
     ```bash
-    cd SeuRepositorio/src
+    cd Console-Raid-Calculator-Java/src
     javac *.java
     ```
 4.  **Run the application:**
