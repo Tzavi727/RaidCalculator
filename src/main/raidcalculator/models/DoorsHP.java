@@ -1,3 +1,4 @@
+package main.raidcalculator.models;
 public class DoorsHP {
 public String Name;
 public int HP;

@@ -1,4 +1,12 @@
+package main.raidcalculator;
 import java.util.Scanner;
+
+import main.raidcalculator.models.C4;
+import main.raidcalculator.models.DoorsHP;
+import main.raidcalculator.models.Explosives;
+import main.raidcalculator.models.Rocket;
+import main.raidcalculator.models.Satchel;
+import main.raidcalculator.models.services.Calc;
 
 public class RustRaidCalculator {
     static Scanner scanner = new Scanner(System.in);
@@ -15,7 +23,6 @@ public class RustRaidCalculator {
         C4,
         LEAVE
     }
-
 
     public static void main(String[] args) throws Exception {
         boolean leave = true;
@@ -133,17 +140,19 @@ public class RustRaidCalculator {
                 if (RaidItemChoice >= 1 && RaidItemChoice < AllDoRaidOptions.length) {
                     DoRaidOptions ChoiceMadeRaid = AllDoRaidOptions[RaidItemChoice - 1];
 
-                    ExplosiveValues ChosenExplo = null;
+                    Explosives ChosenExplo = null;
 
                     switch (ChoiceMadeRaid) {
                         case SATCHEL:
-                            ChosenExplo = ExplosiveValues.satchel;
+                            ChosenExplo = new Satchel();
                             break;
                         case ROCKET:
-                            ChosenExplo = ExplosiveValues.rocket;
+                            ChosenExplo = new Rocket();
+                            ;
                             break;
                         case C4:
-                            ChosenExplo = ExplosiveValues.C4;
+                            ChosenExplo = new C4();
+                            ;
                             break;
                         default:
                             return;
@@ -182,7 +191,6 @@ public class RustRaidCalculator {
         while (true) {
             try {
                 cleanscreen();
-                Calc Mycalc = new Calc();
                 System.out.println("============================================================");
                 System.out.println("Choose the item you want to craft:");
                 System.out.println("============================================================");
@@ -196,6 +204,16 @@ public class RustRaidCalculator {
                 if (ItemInputInt < 1 || ItemInputInt > 3) {
                     throw new NumberFormatException();
                 }
+                DoRaidOptions[] AllOptions = DoRaidOptions.values();
+                Explosives ChoosenItem = null;
+                if (ItemInputInt >= 1 && ItemInputInt <= AllOptions.length) {
+                    switch (ItemInputInt) {
+                        case 1: ChoosenItem = new Satchel(); break;
+                        case 2: ChoosenItem = new C4(); break;
+                        case 3: ChoosenItem = new Rocket(); break;
+                        default: return;
+                    }
+                }
                 cleanscreen();
                 System.out.println("============================================================");
                 System.out.println("Now type the amount that you want to craft:");
@@ -206,59 +224,8 @@ public class RustRaidCalculator {
                 if (AmountInputInt <= 0) {
                     throw new NumberFormatException();
                 }
-
-                DoRaidOptions[] AllOptions = DoRaidOptions.values();
-
-                if (ItemInputInt >= 1 && ItemInputInt <= AllOptions.length) {
-                    switch (ItemInputInt) {
-                        case 1:
-                            cleanscreen();
-                            int SatchelSulfur = ExplosiveValues.satchel.SulfurCost;
-                            int SatchelCharcoal = ExplosiveValues.satchel.CharcoalCost;
-                            int TotalcharcoalSatchel = Mycalc.multiply(SatchelCharcoal, AmountInputInt);
-                            int TotalSulfurSatchel = Mycalc.multiply(SatchelSulfur, AmountInputInt);
-                            System.out.println("============================================================");
-                            System.out.printf(
-                                    "To craft %d Satchels are needed:\n============================================================\n%d-Sulfur\n%d-Charcoal%n",
-                                    AmountInputInt, TotalSulfurSatchel, TotalcharcoalSatchel);
-                            System.out.println("============================================================");
-                            System.out.println("Press ENTER to return to the menu:");
-                            System.out.println("============================================================");
-                            scanner.nextLine();
-                            break;
-                        case 2:
-                            cleanscreen();
-                            int C4sulfur = ExplosiveValues.C4.SulfurCost;
-                            int C4charcoal = ExplosiveValues.C4.CharcoalCost;
-                            int TotalCharcoalForC4 = Mycalc.multiply(C4charcoal, AmountInputInt);
-                            int TotalSulfurForC4 = Mycalc.multiply(C4sulfur, AmountInputInt);
-                            System.out.println("============================================================");
-                            System.out.printf("To craft %d C4 are needed\n%d-Sulfur\n%d-Charcoal%n", AmountInputInt,
-                                    TotalSulfurForC4, TotalCharcoalForC4);
-                            System.out.println("============================================================");
-                            System.out.println("Press ENTER to return to the menu:");
-                            System.out.println("============================================================");
-                            scanner.nextLine();
-                            break;
-                        case 3:
-                            cleanscreen();
-                            int sulfurRocket = ExplosiveValues.rocket.SulfurCost;
-                            int carvaoRocket = ExplosiveValues.rocket.CharcoalCost;
-                            int carvaoTotalRocket = Mycalc.multiply(carvaoRocket, AmountInputInt);
-                            int sulfurTotalRocket = Mycalc.multiply(sulfurRocket, AmountInputInt);
-                            System.out.println("============================================================");
-                            System.out.printf("To craft %d Rockets are needed\n%d-Sulfur\n%d-Charcoal%n",
-                                    AmountInputInt,
-                                    sulfurTotalRocket, carvaoTotalRocket);
-                            System.out.println("============================================================");
-                            System.out.println("Press ENTER to return to the menu:");
-                            System.out.println("============================================================");
-                            scanner.nextLine();
-                            break;
-                        default:
-                            return;
-                    }
-                }
+                CalculateRaidCost(ChoosenItem, AmountInputInt);
+                return;
             } catch (NullPointerException e) {
                 if (invalidchoice()) {
                     return;
@@ -280,6 +247,29 @@ public class RustRaidCalculator {
         }
         cleanscreen();
         return false;
+    }
+
+    public static void CalculateRaidCost(Explosives item, int Amount) {
+        cleanscreen();
+        Calc mycalc = new Calc();
+
+        int SulfurPerUnit = item.SulfurCost;
+        int CharcoalPerUnit = item.CharcoalCost;
+
+        int Totalcharcoal = mycalc.multiply(CharcoalPerUnit, Amount);
+        int TotalSulfur = mycalc.multiply(SulfurPerUnit, Amount);
+
+        System.out.println("============================================================");
+        System.out.printf(
+                "To craft %s %d are needed:\n============================================================\n%d-Sulfur\n%d-Charcoal%n",
+                item.Name,
+                Amount,
+                TotalSulfur,
+                Totalcharcoal);
+        System.out.println("============================================================");
+        System.out.println("Press ENTER to return to the menu:");
+        System.out.println("============================================================");
+        scanner.nextLine();
     }
 
 }
