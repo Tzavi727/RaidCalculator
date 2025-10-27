@@ -2,10 +2,12 @@ package main.raidcalculator;
 import java.util.Scanner;
 
 import main.raidcalculator.models.C4;
-import main.raidcalculator.models.DoorsHP;
+import main.raidcalculator.models.Door;
 import main.raidcalculator.models.Explosives;
 import main.raidcalculator.models.Rocket;
 import main.raidcalculator.models.Satchel;
+import main.raidcalculator.models.StructuresHP;
+import main.raidcalculator.models.Wall;
 import main.raidcalculator.models.services.Calc;
 
 public class RustRaidCalculator {
@@ -33,7 +35,7 @@ public class RustRaidCalculator {
             System.out.println("choose below what you want to do:");
             System.out.println("============================================================");
             System.out.println(
-                    "1-Calculate how much explosive needed to raid each door type\n2-Calculate materials needed to craft each raid item\n3-Shutdown program");
+                    "1-Calculate how much explosive needed to raid each structure type\n2-Calculate materials needed to craft each raid item\n3-Shutdown program");
             System.out.println("============================================================");
 
             String input = scanner.nextLine();
@@ -75,51 +77,58 @@ public class RustRaidCalculator {
     }
 
     public static void DORAIDCALC() {
-        DoorsHP choosendoor = null;
         String doorchoiceStr;
+        StructuresHP choosenstructure = null;
         while (true) {
+            try{
             cleanscreen();
             System.out.println("============================================================");
-            System.out.println("Which type of door do you want to raid ?");
+            System.out.println("Which type of structure do you want to raid ?");
             System.out.println("============================================================");
-            System.out.println("1-Armored Door\n2-Metal Door\n3-Wooden Door\n4-Voltar");
+            System.out.println("1-Armored Door\n2-Metal Door\n3-Wooden Door\n4-Wooden Wall\n5-Stone Wall\n6-Sheet Metal Door\n7-Armored Wall\n8-Return");
             System.out.println("============================================================");
             doorchoiceStr = scanner.nextLine();
             int doorchoiceInt = Integer.parseInt(doorchoiceStr);
-            if (doorchoiceInt >= 1 && doorchoiceInt <= 4) {
+            if(doorchoiceInt == 8)
+            {
+                return;
+            }
+            if(doorchoiceInt < 1 || doorchoiceInt >7)
+            {
+                throw new NumberFormatException();
+            }
+            {
                 switch (doorchoiceInt) {
-                    case 1:
-                        choosendoor = DoorsHP.ArmoredDoor;
-                        break;
-                    case 2:
-                        choosendoor = DoorsHP.SheetMetalDoor;
-                        break;
-                    case 3:
-                        choosendoor = DoorsHP.WoodenDoor;
-                        break;
-                    default:
-                        return;
+                    case 1: choosenstructure = Door.ARMORED_DOOR; break;
+                    case 2: choosenstructure = Door.SHEET_METAL; break;
+                    case 3: choosenstructure = Door.WOODEN_DOOR; break;
+                    case 4: choosenstructure = Wall.WOODEN_WALL; break;
+                    case 5: choosenstructure = Wall.STONE_WALL; break;
+                    case 6: choosenstructure = Wall.METAL_WALL; break;
+                    case 7: choosenstructure = Wall.ARMORED_WALL; break;
+                    default: return;
                 }
-                break;
-            } else {
-                invalidchoice();
+            }
+            CalcDoorDmg(choosenstructure);
+            return;
+            }catch(NumberFormatException e){
+                if(invalidchoice()) return;
             }
         }
-        CalcDoorDmg(choosendoor);
     }
 
-    public static void CalcDoorDmg(DoorsHP ChoosenDoor) {
+    public static void CalcDoorDmg(StructuresHP choosenstructure) {
         while (true) {
             try {
                 cleanscreen();
                 System.out.println("============================================================");
-                System.out.printf("Calculating for the door: %s (%d HP)%n", ChoosenDoor.Name, ChoosenDoor.HP);
+                System.out.printf("Calculating for the door: %s (%d HP)%n", choosenstructure.Name, choosenstructure.HP);
                 System.out.println("============================================================");
 
-                System.out.println("How many doors this type you want to raid?");
+                System.out.println("How many structures this type you want to raid?");
                 System.out.println("============================================================");
-                String AmountofDoorsStr = scanner.nextLine();
-                int AmountofDoorsInt = Integer.parseInt(AmountofDoorsStr);
+                String AmountofStructuresStr = scanner.nextLine();
+                int AmountofDoorsInt = Integer.parseInt(AmountofStructuresStr);
 
                 if (AmountofDoorsInt == 0)
                     return;
@@ -157,11 +166,11 @@ public class RustRaidCalculator {
                         default:
                             return;
                     }
-                    int TotalHP = ChoosenDoor.HP * AmountofDoorsInt;
+                    int TotalHP = choosenstructure.HP * AmountofDoorsInt;
                     int RaidCost = (int) Math.ceil((double) TotalHP / ChosenExplo.Damage);
                     System.out.println("======================== RESULT =========================");
                     System.out.printf("To destroy %d '%s'(s), You are going to need:%n", AmountofDoorsInt,
-                            ChoosenDoor.Name);
+                            choosenstructure.Name);
                     System.out.printf("%d Units of '%s'.%n", RaidCost, ChosenExplo.Name);
                     System.out.println("============================================================");
                     int charcoalcost = ChosenExplo.CharcoalCost * RaidCost;
